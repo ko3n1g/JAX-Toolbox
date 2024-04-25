@@ -14,7 +14,7 @@ on:
         default: ghcr.io/nvidia/jax:mealkit
       BUILD_DATE:
         type: string
-        description: "Build date in YYYY-MM-DD format"
+        description: 'Build date in YYYY-MM-DD format'
         required: false
         default: 'NOT SPECIFIED'
       ARTIFACT_NAME:
@@ -27,15 +27,15 @@ on:
         required: true
       CONTAINER_NAME:
         type: string
-        description: "Container name, e.g. upstream-t5x"
+        description: 'Container name, e.g. upstream-t5x'
         required: true
       DOCKERFILE:
         type: string
-        description: "Dockerfile to use, e.g. .github/container/Dockerfile.t5x.amd64"
+        description: 'Dockerfile to use, e.g. .github/container/Dockerfile.t5x.amd64'
         required: true
       RUNNER_SIZE:
         type: string
-        description: "Size of the runner to use"
+        description: 'Size of the runner to use'
         required: false
         default: small
     outputs:
@@ -43,21 +43,21 @@ on:
         description: "Tags of the 'mealkit' image built"
         value: ${{ jobs.build.outputs.DOCKER_TAG_MEALKIT }}
       DOCKER_TAG_FINAL:
-        description: "Tags of the complete image built"
+        description: 'Tags of the complete image built'
         value: ${{ jobs.build.outputs.DOCKER_TAG_FINAL }}
 
 env:
   UPLD_IMAGE: ghcr.io/nvidia/jax-toolbox-internal
 
 permissions:
-  contents: read  # to fetch code
-  actions:  write # to cancel previous workflows
+  contents: read # to fetch code
+  actions: write # to cancel previous workflows
   packages: write # to upload container
 
 jobs:
   build:
     name: build-${{ inputs.CONTAINER_NAME }}
-    runs-on: [self-hosted, "${{ inputs.ARCHITECTURE }}", "${{ inputs.RUNNER_SIZE }}"]
+    runs-on: self-hosted
     env:
       BADGE_FILENAME_FULL: ${{ inputs.BADGE_FILENAME }}-${{ inputs.ARCHITECTURE }}.json
     outputs:
@@ -108,8 +108,7 @@ jobs:
             latest=false
           tags: |
             type=raw,value=${{ github.run_id }}-${{ inputs.CONTAINER_NAME }}-${{ inputs.ARCHITECTURE }}-mealkit
-          labels:
-            org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
+          labels: org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
 
       - name: Build mealkit image
         id: mealkit-build
@@ -140,8 +139,7 @@ jobs:
             latest=false
           tags: |
             type=raw,value=${{ github.run_id }}-${{ inputs.CONTAINER_NAME }}-${{ inputs.ARCHITECTURE }}
-          labels:
-            org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
+          labels: org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
 
       - name: Build final image
         id: final-build
@@ -164,7 +162,7 @@ jobs:
             BUILD_DATE=${{ inputs.BUILD_DATE }}
 
       - name: Generate sitrep
-        if: "!cancelled()"
+        if: '!cancelled()'
         shell: bash -x -e {0}
         run: |
           # bring in utility functions
@@ -198,7 +196,7 @@ jobs:
           > ${{ env.BADGE_FILENAME_FULL }}
 
       - name: Upload sitrep and badge
-        if: "!cancelled()"
+        if: '!cancelled()'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.ARTIFACT_NAME }}-${{ inputs.ARCHITECTURE }}

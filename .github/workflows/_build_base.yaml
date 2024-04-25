@@ -14,7 +14,7 @@ on:
         default: latest
       BUILD_DATE:
         type: string
-        description: "Build date in YYYY-MM-DD format"
+        description: 'Build date in YYYY-MM-DD format'
         required: false
         default: 'NOT SPECIFIED'
       ARTIFACT_NAME:
@@ -44,21 +44,20 @@ on:
         required: false
     outputs:
       DOCKER_TAG:
-        description: "Tag of the image built"
+        description: 'Tag of the image built'
         value: ${{ jobs.build-base.outputs.DOCKER_TAG }}
 
 env:
   UPLD_IMAGE: ghcr.io/nvidia/jax-toolbox-internal
 
 permissions:
-  contents: read  # to fetch code
-  actions:  write # to cancel previous workflows
+  contents: read # to fetch code
+  actions: write # to cancel previous workflows
   packages: write # to upload container
 
 jobs:
-
   build-base:
-    runs-on: [self-hosted, "${{ inputs.ARCHITECTURE }}", small]
+    runs-on: self-hosted
     env:
       BADGE_FILENAME_FULL: ${{ inputs.BADGE_FILENAME }}-${{ inputs.ARCHITECTURE }}.json
     outputs:
@@ -115,8 +114,7 @@ jobs:
             latest=false
           tags: |
             type=raw,value=${{ github.run_id }}-base-${{ inputs.ARCHITECTURE }}
-          labels:
-            org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
+          labels: org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
 
       - name: Build docker images
         id: build
@@ -133,9 +131,9 @@ jobs:
             GIT_USER_EMAIL=${{ inputs.GIT_USER_EMAIL }}
             BUILD_DATE=${{ inputs.BUILD_DATE }}
             ${{ inputs.BASE_IMAGE != 'latest' && format('BASE_IMAGE={0}', inputs.BASE_IMAGE) || '' }}
-        
+
       - name: Generate sitrep
-        if: "!cancelled()"
+        if: '!cancelled()'
         shell: bash -x -e {0}
         run: |
           # bring in utility functions
@@ -169,7 +167,7 @@ jobs:
           > ${{ env.BADGE_FILENAME_FULL }}
 
       - name: Upload sitrep and badge
-        if: "!cancelled()"
+        if: '!cancelled()'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.ARTIFACT_NAME }}-${{ inputs.ARCHITECTURE }}

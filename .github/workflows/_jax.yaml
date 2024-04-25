@@ -139,7 +139,7 @@ jobs:
       MANIFEST_ARTIFACT_NAME: ${{ needs.metadata.outputs.MANIFEST_ARTIFACT_NAME }}
     secrets: inherit
 
-  # _core.yaml
+  # AMD64: JAX
   build-jax-amd64:
     uses: ./.github/workflows/_build.yaml
     needs: base-amd64
@@ -211,6 +211,7 @@ jobs:
         test-pallas.log
     secrets: inherit
 
+  # AMD64: PAX
   pax-amd64:
     needs: build-jax-amd64 # should be: [test-jax-amd64,test-pallas-amd64]
     runs-on: self-hosted
