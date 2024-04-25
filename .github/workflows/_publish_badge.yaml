@@ -21,10 +21,9 @@ on:
         description: 'Summary pass/fail value indicating if badge results are acceptable overall'
         value: ${{ jobs.publish.outputs.STATUS }}
 
-
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     outputs:
       STATUS: ${{ steps.script.outputs.STATUS }}
     steps:

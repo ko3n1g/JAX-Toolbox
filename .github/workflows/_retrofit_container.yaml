@@ -21,7 +21,7 @@ on:
       #   description: "Tags of the multi-arch image published"
       #   value: ${{ jobs.publish.outputs.MULTIARCH_TAG }}
       SINGLEARCH_TAGS:
-        description: "Tags of the single-arch images published"
+        description: 'Tags of the single-arch images published'
         value: ${{ jobs.publish.outputs.SINGLEARCH_TAGS }}
 
 env:
@@ -29,7 +29,7 @@ env:
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     outputs:
       # MULTIARCH_TAG: ${{ steps.meta.outputs.tags }}
       SINGLEARCH_TAGS: ${{ steps.single-arch.outputs.tags }}

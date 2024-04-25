@@ -19,7 +19,7 @@ on:
 
 jobs:
   copy-gist:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: copy badge to primary Gist
         uses: actions/github-script@v7

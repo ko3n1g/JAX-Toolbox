@@ -21,7 +21,7 @@ on:
 jobs:
   # create shields.io badge endpoint JSON for workflow metadata
   workflow-badge:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     env:
       ARTIFACT_NAME: 'artifact-workflow-metadata'
       BADGE_FILENAME: 'badge-workflow-metadata.json'
@@ -57,7 +57,7 @@ jobs:
             ${{ env.BADGE_FILENAME }}
 
   upload-badge:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     needs: [workflow-badge]
     env:
       # Name/bash regex for shields.io endpoint JSON files
@@ -124,7 +124,7 @@ jobs:
           echo "GIST_ID=${GIST_ID//\"/}" >> $GITHUB_OUTPUT
 
   report:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -168,7 +168,7 @@ jobs:
           done
           echo "]" >> fsitrep.json
           mv fsitrep.json sitrep.json
-          
+
       - name: Upload training logs as artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -177,7 +177,7 @@ jobs:
 
   publish-badge:
     needs: [upload-badge]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     env:
       # Name/bash regex for shields.io endpoint JSON files
       PUBLISH_BADGE_FILES: '(.*badge.*\.json|.*\.md)'

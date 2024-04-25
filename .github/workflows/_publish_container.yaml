@@ -25,10 +25,10 @@ on:
         required: true
     outputs:
       DOCKER_TAGS:
-        description: "Tags of the image published"
+        description: 'Tags of the image published'
         value: ${{ jobs.publish.outputs.DOCKER_TAGS }}
       PACKAGE_URL:
-        description: "Direct link to the GitHub package page for this image"
+        description: 'Direct link to the GitHub package page for this image'
         value: ${{ jobs.publish.outputs.PACKAGE_URL }}
 
 env:
@@ -36,7 +36,7 @@ env:
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     outputs:
       DOCKER_TAGS: ${{ steps.meta.outputs.tags }}
       PACKAGE_URL: ${{ steps.github-meta.package_url }}
@@ -119,7 +119,7 @@ jobs:
           echo "[${{ env.DOCKER_REGISTRY }}/${{ inputs.TARGET_IMAGE }}:${{ inputs.ARTIFACT_TAG }}](${package_url})" > "${{ inputs.ARTIFACT_NAME }}.md"
 
       - name: Upload link file
-        if: "!cancelled()"
+        if: '!cancelled()'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.ARTIFACT_NAME }}

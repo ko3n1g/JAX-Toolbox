@@ -34,31 +34,30 @@ on:
         value: ${{ jobs.sitrep.outputs.STATUS }}
 
 jobs:
-
   t5x-multi-gpu:
     strategy:
       matrix:
         include:
-          - TEST_NAME: "1P1G"
+          - TEST_NAME: '1P1G'
             N_GPU: 1
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "1P2G"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '1P2G'
             N_GPU: 2
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "1P4G"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '1P4G'
             N_GPU: 4
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "1P8G"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '1P8G'
             N_GPU: 8
-          - TEST_NAME: "1P1G_fmha"
+          - TEST_NAME: '1P1G_fmha'
             N_GPU: 1
-            ADDITIONAL_ARGS: "--enable-fmha 1"
-          - TEST_NAME: "1P2G_fmha"
+            ADDITIONAL_ARGS: '--enable-fmha 1'
+          - TEST_NAME: '1P2G_fmha'
             N_GPU: 2
-            ADDITIONAL_ARGS: "--enable-fmha 1"
+            ADDITIONAL_ARGS: '--enable-fmha 1'
       fail-fast: false
 
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     steps:
       - name: Print environment variables
@@ -135,7 +134,7 @@ jobs:
               ${{ matrix.ADDITIONAL_ARGS }} 
           EOF
           )
-          
+
           echo "SLURM_JOB_ID=${JOB}" >> $GITHUB_OUTPUT
 
           . .github/workflows/scripts/wait_for_slurm_job.sh
@@ -193,49 +192,49 @@ jobs:
     strategy:
       matrix:
         include:
-          - TEST_NAME: "1G1N"
+          - TEST_NAME: '1G1N'
             N_GPU: 1
             N_NODE: 1
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "2G1N"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '2G1N'
             N_GPU: 2
             N_NODE: 1
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "4G1N"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '4G1N'
             N_GPU: 4
             N_NODE: 1
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "8G1N"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '8G1N'
             N_GPU: 8
             N_NODE: 1
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "1G2N"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '1G2N'
             N_GPU: 1
             N_NODE: 2
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "2G2N"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '2G2N'
             N_GPU: 2
             N_NODE: 2
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "4G2N"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '4G2N'
             N_GPU: 4
             N_NODE: 2
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "8G2N"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '8G2N'
             N_GPU: 8
             N_NODE: 2
-            ADDITIONAL_ARGS: ""
-          - TEST_NAME: "2G2N_fmha"
+            ADDITIONAL_ARGS: ''
+          - TEST_NAME: '2G2N_fmha'
             N_GPU: 2
             N_NODE: 2
-            ADDITIONAL_ARGS: "--enable-fmha 1"
-          - TEST_NAME: "8G2N_fmha"
+            ADDITIONAL_ARGS: '--enable-fmha 1'
+          - TEST_NAME: '8G2N_fmha'
             N_GPU: 8
             N_NODE: 2
-            ADDITIONAL_ARGS: "--enable-fmha 1"
+            ADDITIONAL_ARGS: '--enable-fmha 1'
       fail-fast: false
 
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     steps:
       - name: Print environment variables
@@ -372,7 +371,7 @@ jobs:
 
   metrics:
     needs: [t5x-multi-node, t5x-multi-gpu]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     steps:
       - name: Check out the repository under ${GITHUB_WORKSPACE}
@@ -403,10 +402,9 @@ jobs:
             report.jsonl
             *_metrics.json
 
-
   sitrep:
     needs: metrics
-    if: "!cancelled()"
+    if: '!cancelled()'
     uses: ./.github/workflows/_sitrep_mgmn.yaml
     secrets: inherit
     with:
@@ -415,9 +413,9 @@ jobs:
       FW_NAME: ${{ inputs.FW_NAME }}
 
   summary:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     needs: [t5x-multi-node, t5x-multi-gpu]
-    if: "!cancelled()"
+    if: '!cancelled()'
     steps:
       - name: Generate TensorBoard query URL
         run: |
@@ -433,8 +431,8 @@ jobs:
 
   outcome:
     needs: sitrep
-    runs-on: ubuntu-22.04
-    if: "!cancelled()"
+    runs-on: self-hosted
+    if: '!cancelled()'
     steps:
       - name: Sets workflow status based on test outputs
         run: |

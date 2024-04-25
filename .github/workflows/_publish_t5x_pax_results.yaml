@@ -14,13 +14,13 @@ on:
         required: false
       ARTIFACT_NAME:
         type: string
-        description:  If provided, will prepend a prefix to the artifact name. Helpful if re-running this reusable workflow to prevent clobbering of artifacts
-        default: ""
+        description: If provided, will prepend a prefix to the artifact name. Helpful if re-running this reusable workflow to prevent clobbering of artifacts
+        default: ''
         required: false
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Setup SSH agent
         uses: webfactory/ssh-agent@v0.9.0

@@ -44,7 +44,7 @@ env:
 
 jobs:
   metadata:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     outputs:
       BUILD_DATE: ${{ steps.date.outputs.BUILD_DATE }}
       PUBLISH: ${{ steps.if-publish.outputs.PUBLISH }}
@@ -104,7 +104,7 @@ jobs:
 
   bump-manifest:
     needs: metadata
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Check out the repository under ${GITHUB_WORKSPACE}
         uses: actions/checkout@v4
@@ -158,7 +158,7 @@ jobs:
 
   # Only merge if everything succeeds
   merge-new-manifest:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     if: ${{ !cancelled() && needs.metadata.outputs.MERGE_BUMPED_MANIFEST == 'true' && needs.metadata.outputs.MANIFEST_BRANCH != github.sha }}
     needs:
       - metadata
@@ -268,7 +268,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   make-publish-configs:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     if: ${{ !cancelled() }}
     env:
       MEALKIT_IMAGE_REPO: ${{ needs.metadata.outputs.PUBLISH == 'true' && 'jax-mealkit' || 'mock-jax-mealkit' }}

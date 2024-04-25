@@ -78,10 +78,9 @@ on:
         value: ${{ jobs.run-test.outputs.SLURM_EXITCODE }}
 
 jobs:
-
   run-test:
     name: ${{ inputs.NAME }}
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     outputs:
       SLURM_JOB_ID: ${{ steps.submit.outputs.SLURM_JOB_ID }}
       SLURM_STATE: ${{ steps.exit-info.outputs.SLURM_STATE }}
@@ -118,7 +117,7 @@ jobs:
           for var in IMAGE LOG_FILE OUTPUT_PATH; do
             echo "$var=${!var}" >> $GITHUB_OUTPUT
           done
-          
+
       - name: Submit SLURM jobs over SSH
         id: submit
         shell: bash -O expand_aliases -x -e {0}
@@ -208,7 +207,7 @@ jobs:
           fi
 
       - name: Gather artifacts
-        if: "!cancelled()"
+        if: '!cancelled()'
         shell: bash -x -e {0}
         run: |
           function rsync-down() {
@@ -220,7 +219,7 @@ jobs:
           rsync-down ${{ steps.meta.outputs.OUTPUT_PATH }}/* artifacts/output/
 
       - name: Write sitrep status
-        if: "!cancelled()"
+        if: '!cancelled()'
         shell: bash -x -e {0}
         run: |
           . .github/workflows/scripts/to_json.sh
@@ -233,7 +232,7 @@ jobs:
           > artifacts/sitrep.json
 
       - name: Upload training logs as artifacts
-        if: "!cancelled()"
+        if: '!cancelled()'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.NAME }}

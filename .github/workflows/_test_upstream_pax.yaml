@@ -29,16 +29,15 @@ on:
         value: ${{ jobs.sitrep.outputs.STATUS }}
 
 jobs:
-
   single-process-multi-device:
     strategy:
       matrix:
         PARALLEL_CONFIG:
-        - [1, 8, 1, 1]
-        - [1, 1, 2, 4]
+          - [1, 8, 1, 1]
+          - [1, 1, 2, 4]
       fail-fast: false
 
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     steps:
       - name: Print environment variables
@@ -94,14 +93,14 @@ jobs:
           #SBATCH --time=00:30:00
           #SBATCH --output=${{ steps.meta.outputs.LOG_FILE }}
           #SBATCH --export="VOCAB_PATH=gs://t5-data/vocabs/cc_all.32000.100extra/sentencepiece.model,ENROOT_PASSWORD=${{ secrets.GITHUB_TOKEN }}"
-          
+
           # preload enroot container using one task per node
           time srun \
             --ntasks-per-node=1 \
             --container-name=runtime \
             --container-image=${{ steps.meta.outputs.IMAGE }} \
             true
-          
+
           # run job with tasks on each node sharing one container
           time srun \
             --ntasks=1 \
@@ -181,27 +180,27 @@ jobs:
           - TEST_NAME: 1DP1FSDP1TP1PP
             PARALLEL_CONFIG: [1, 1, 1, 1]
             BATCH_SIZE: 4
-            ADDITIONAL_ARGS: ""
+            ADDITIONAL_ARGS: ''
           - TEST_NAME: 8DP1FSDP1TP1PP
             PARALLEL_CONFIG: [1, 8, 1, 1]
             BATCH_SIZE: 4
-            ADDITIONAL_ARGS: ""
+            ADDITIONAL_ARGS: ''
           - TEST_NAME: 1DP8FSDP1TP1PP
             PARALLEL_CONFIG: [1, 1, 8, 1]
             BATCH_SIZE: 4
-            ADDITIONAL_ARGS: ""
+            ADDITIONAL_ARGS: ''
           - TEST_NAME: 2DP1FSDP1TP4PP
             PARALLEL_CONFIG: [4, 2, 1, 1]
             BATCH_SIZE: 4
-            ADDITIONAL_ARGS: ""
+            ADDITIONAL_ARGS: ''
           - TEST_NAME: 4DP1FSDP2TP1PP
             PARALLEL_CONFIG: [1, 4, 1, 2]
             BATCH_SIZE: 4
-            ADDITIONAL_ARGS: ""
+            ADDITIONAL_ARGS: ''
           - TEST_NAME: 16DP1FSDP1TP1PP
             PARALLEL_CONFIG: [1, 16, 1, 1]
             BATCH_SIZE: 4
-            ADDITIONAL_ARGS: ""
+            ADDITIONAL_ARGS: ''
           - TEST_NAME: 2DP1FSDP2TP4PP
             PARALLEL_CONFIG: [4, 2, 1, 2]
             BATCH_SIZE: 4
@@ -209,10 +208,10 @@ jobs:
             PARALLEL_CONFIG: [1, 1, 8, 1]
             BATCH_SIZE: 4
             EVALUATE: true
-            ADDITIONAL_ARGS: "--model-type LLaMA70BProxy --evaluate"
+            ADDITIONAL_ARGS: '--model-type LLaMA70BProxy --evaluate'
       fail-fast: false
 
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     steps:
       - name: Print environment variables
@@ -357,10 +356,10 @@ jobs:
     strategy:
       matrix:
         PARALLEL_CONFIG:
-        - [1, 8, 1, 1]
+          - [1, 8, 1, 1]
       fail-fast: false
 
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     steps:
       - name: Print environment variables
@@ -424,7 +423,7 @@ jobs:
             --container-name=runtime \
             --container-image=${{ steps.meta.outputs.IMAGE }} \
             true
-          
+
           # run job with tasks on each node sharing one container
           time srun \
             --ntasks=${{ steps.meta.outputs.TOTAL_TASKS }} \
@@ -501,8 +500,9 @@ jobs:
           path: output/*
 
   metrics:
-    needs: [single-process-multi-device, pax-multi-node, single-process-evaluation]
-    runs-on: ubuntu-22.04
+    needs:
+      [single-process-multi-device, pax-multi-node, single-process-evaluation]
+    runs-on: self-hosted
 
     steps:
       - name: Check out the repository under ${GITHUB_WORKSPACE}
@@ -535,7 +535,7 @@ jobs:
 
   sitrep:
     needs: metrics
-    if: "!cancelled()"
+    if: '!cancelled()'
     uses: ./.github/workflows/_sitrep_mgmn.yaml
     secrets: inherit
     with:
@@ -544,9 +544,10 @@ jobs:
       FW_NAME: ${{ inputs.FW_NAME }}
 
   summary:
-    runs-on: ubuntu-22.04
-    needs: [single-process-multi-device, pax-multi-node, single-process-evaluation]
-    if: "!cancelled()"
+    runs-on: self-hosted
+    needs:
+      [single-process-multi-device, pax-multi-node, single-process-evaluation]
+    if: '!cancelled()'
     steps:
       - name: Generate TensorBoard query URL
         run: |
@@ -562,8 +563,8 @@ jobs:
 
   outcome:
     needs: sitrep
-    runs-on: ubuntu-22.04
-    if: "!cancelled()"
+    runs-on: self-hosted
+    if: '!cancelled()'
     steps:
       - name: Sets workflow status based on test outputs
         run: |

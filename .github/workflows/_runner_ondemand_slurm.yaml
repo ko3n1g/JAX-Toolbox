@@ -18,7 +18,6 @@ on:
         required: true
 
 jobs:
-
   launch-slurm-runner:
     runs-on: ubuntu-latest
     steps:
@@ -100,7 +99,7 @@ jobs:
             -e RUNNER_EPHEMERAL=true \
             -e DOCKER_ENABLED=true \
             -e DOCKERD_IN_RUNNER=true \
-            ghcr.io/yhtang/actions-runner-dind:ubuntu-22.04  # use personal repo for the time being to avoid auth/cost issues
+            ghcr.io/yhtang/actions-runner-dind:self-hosted  # use personal repo for the time being to avoid auth/cost issues
           EOF
 
           echo "SLURM_JOB_ID=$(cat ${SLURM_JOB_ID_FILE})" >> $GITHUB_OUTPUT

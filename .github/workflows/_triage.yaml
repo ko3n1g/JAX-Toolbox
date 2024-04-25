@@ -1,48 +1,48 @@
-name: "~Triage T5x or Pax"
+name: '~Triage T5x or Pax'
 
 on:
   workflow_call:
     inputs:
       BASE_IMAGE:
         type: string
-        description: "Base image to fast-forward dependencies (older)"
+        description: 'Base image to fast-forward dependencies (older)'
         required: false
-        default: "ghcr.io/nvidia/upstream-pax:nightly-2023-07-06"
+        default: 'ghcr.io/nvidia/upstream-pax:nightly-2023-07-06'
       BROKEN_IMAGE:
         type: string
         description: 'Broken image (newer)'
         required: false
-        default: "ghcr.io/nvidia/upstream-pax:nightly-2023-07-08"
+        default: 'ghcr.io/nvidia/upstream-pax:nightly-2023-07-08'
       REPO_DIRS:
         type: string
         description: "Space separated dirs to fast-forward (e.g., '/opt/flax /opt/t5x')"
         required: false
-        default: ""
+        default: ''
       FILE_ISSUE:
         type: boolean
-        description: "If true, will create a github issue"
+        description: 'If true, will create a github issue'
         required: false
         default: false
   workflow_dispatch:
     inputs:
       BASE_IMAGE:
         type: string
-        description: "Base image to fast-forward dependencies (older)"
+        description: 'Base image to fast-forward dependencies (older)'
         required: false
-        default: "ghcr.io/nvidia/upstream-t5x:nightly-2023-07-18"
+        default: 'ghcr.io/nvidia/upstream-t5x:nightly-2023-07-18'
       BROKEN_IMAGE:
         type: string
         description: 'Broken image (newer)'
         required: false
-        default: "ghcr.io/nvidia/upstream-t5x:nightly-2023-07-20"
+        default: 'ghcr.io/nvidia/upstream-t5x:nightly-2023-07-20'
       REPO_DIRS:
         type: string
         description: "Space separated dirs to fast-forward (e.g., '/opt/flax /opt/t5x')"
         required: false
-        default: ""
+        default: ''
       FILE_ISSUE:
         type: boolean
-        description: "If true, will create a github issue"
+        description: 'If true, will create a github issue'
         required: false
         default: false
 
@@ -51,13 +51,13 @@ env:
   PAX_ASSIGNEE: ashors1
   T5X_ASSIGNEE: terrykong
   JAX_ASSIGNEE: yhtang
-  STAKEHOLDERS: "@ashors1 @terrykong @yhtang"
+  STAKEHOLDERS: '@ashors1 @terrykong @yhtang'
 
 permissions:
-  contents: read  # to fetch code
-  actions:  write # to cancel previous workflows
+  contents: read # to fetch code
+  actions: write # to cancel previous workflows
   packages: write # to upload container
-  issues: write   # to create issues
+  issues: write # to create issues
 
 jobs:
   metadata:
@@ -73,7 +73,7 @@ jobs:
       FRAMEWORK_BASE: ${{ steps.meta.outputs.FRAMEWORK_BASE }}
       BROKEN_DATE: ${{ steps.meta.outputs.BROKEN_DATE }}
       UPLD_IMAGE: ${{ steps.meta.outputs.UPLD_IMAGE }}
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Check out the repository under ${GITHUB_WORKSPACE}
         uses: actions/checkout@v4
@@ -93,7 +93,7 @@ jobs:
           source .github/workflows/scripts/all_image_tags.sh
           BASE_IMAGE=${{ inputs.BASE_IMAGE }}
           BROKEN_IMAGE=${{ inputs.BROKEN_IMAGE }}
-        
+
           BASE_IMAGE_REPO=$(echo $BASE_IMAGE | rev | cut -d: -f2- | rev)
           FRAMEWORK_BASE=$(echo $BASE_IMAGE_REPO | rev | cut -d/ -f1 | rev)
           if [[ $FRAMEWORK_BASE != upstream-t5x && $FRAMEWORK_BASE != upstream-pax ]]; then
@@ -108,7 +108,7 @@ jobs:
               echo "$start_date > $end_date, which is not supported"
               exit 1
             fi
-        
+
             while [[ "$start_date" < "$end_date" ]]; do
               echo nightly-$start_date
               start_date=$(date -I -d "$start_date + 1 day")
@@ -126,7 +126,7 @@ jobs:
             echo "Script assumes $BROKEN_IMAGE exists, but it wasn't found"
             exit 1
           fi
-        
+
           echo "TAGS_BETWEEN=$(generate_tags $start_date $end_date | filter_valid_tags | jq -R -s -c 'split("\n")[:-1]')" | tee -a $GITHUB_OUTPUT
           echo "BASE_IMAGE_REPO=$BASE_IMAGE_REPO" | tee -a $GITHUB_OUTPUT
           echo "BROKEN_IMAGE=$BROKEN_IMAGE" | tee -a $GITHUB_OUTPUT
@@ -171,8 +171,7 @@ jobs:
             latest=false
           tags: |
             type=raw,value=${{ github.run_id }}-${{ matrix.base_tag }}-ff-t5x-to-${{ needs.metadata.outputs.BROKEN_DATE }}
-          labels:
-            org.opencontainers.image.created=${{ needs.metadata.outputs.BROKEN_DATE }}
+          labels: org.opencontainers.image.created=${{ needs.metadata.outputs.BROKEN_DATE }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -180,7 +179,7 @@ jobs:
           driver-opts: |
             image=moby/buildkit:v0.10.6
 
-      - name: "Build docker image: ${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-t5x-to-${{ needs.metadata.outputs.BROKEN_DATE }}"
+      - name: 'Build docker image: ${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-t5x-to-${{ needs.metadata.outputs.BROKEN_DATE }}'
         uses: docker/build-push-action@v5
         with:
           context: .github/container
@@ -192,7 +191,7 @@ jobs:
             BASE_IMAGE=${{ inputs.BASE_IMAGE }}
             BROKEN_IMAGE=${{ inputs.BROKEN_IMAGE }}
             REPO_DIRS=${{ inputs.REPO_DIRS }}
-      
+
       - name: Log image to Github Step Summary
         run: |
           cat <<EOF | tee -a $GITHUB_STEP_SUMMARY
@@ -208,13 +207,13 @@ jobs:
         base_tag: ${{fromJson(needs.metadata.outputs.TAGS_BETWEEN)}}
     uses: ./.github/workflows/_test_upstream_t5x.yaml
     with:
-      T5X_IMAGE: "${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-t5x-to-${{ needs.metadata.outputs.BROKEN_DATE }}"
+      T5X_IMAGE: '${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-t5x-to-${{ needs.metadata.outputs.BROKEN_DATE }}'
     secrets: inherit
-  
+
   t5x-ff-summary:
     if: (success() || failure()) && needs.metadata.outputs.FRAMEWORK_BASE == 'upstream-t5x'
     needs: [metadata, test-t5x-ff]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Create table summarizing
         id: summary-table
@@ -237,7 +236,7 @@ jobs:
           while IFS= read -r line; do
             name_conclusion_array+=("$line")
           done < <(echo "$json_data" | jq -r '.jobs[] | select(.name | startswith("test-t5x-ff") and contains("outcome")) | "\(.name)\t\(.conclusion)"')
-        
+
           TABLE_MD=$(
           cat <<EOF
           | Rewind to | Test result | Image |
@@ -289,15 +288,15 @@ jobs:
           body: |
             | 
             * Github Action run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-  
+
             ${{ steps.summary-table.outputs.TABLE_MD }}
-            
+
             ${{ env.STAKEHOLDERS }}
           assignee: ${{ steps.summary-table.outputs.ASSIGNEE }}
-          labels: "[\"auto-triage\"]"
+          labels: '["auto-triage"]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
+
   ########
   ## PAX #
   ########
@@ -334,8 +333,7 @@ jobs:
             latest=false
           tags: |
             type=raw,value=${{ github.run_id }}-${{ matrix.base_tag }}-ff-pax-to-${{ needs.metadata.outputs.BROKEN_DATE }}
-          labels:
-            org.opencontainers.image.created=${{ needs.metadata.outputs.BROKEN_DATE }}
+          labels: org.opencontainers.image.created=${{ needs.metadata.outputs.BROKEN_DATE }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -343,7 +341,7 @@ jobs:
           driver-opts: |
             image=moby/buildkit:v0.10.6
 
-      - name: "Build docker image: ${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-pax-to-${{ needs.metadata.outputs.BROKEN_DATE }}"
+      - name: 'Build docker image: ${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-pax-to-${{ needs.metadata.outputs.BROKEN_DATE }}'
         uses: docker/build-push-action@v5
         with:
           context: .github/container
@@ -355,7 +353,7 @@ jobs:
             BASE_IMAGE=${{ inputs.BASE_IMAGE }}
             BROKEN_IMAGE=${{ inputs.BROKEN_IMAGE }}
             REPO_DIRS=${{ inputs.REPO_DIRS }}
-      
+
   test-pax-ff:
     needs: [metadata, build-pax-ff]
     strategy:
@@ -365,13 +363,13 @@ jobs:
         base_tag: ${{fromJson(needs.metadata.outputs.TAGS_BETWEEN)}}
     uses: ./.github/workflows/_test_upstream_pax.yaml
     with:
-      PAX_IMAGE: "${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-pax-to-${{ needs.metadata.outputs.BROKEN_DATE }}"
+      PAX_IMAGE: '${{ needs.metadata.outputs.UPLD_IMAGE }}:${{ github.run_id }}-${{ matrix.base_tag }}-ff-pax-to-${{ needs.metadata.outputs.BROKEN_DATE }}'
     secrets: inherit
-  
+
   pax-ff-summary:
     if: (success() || failure()) && needs.metadata.outputs.FRAMEWORK_BASE == 'upstream-pax'
     needs: [metadata, test-pax-ff]
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Create table summarizing
         id: summary-table
@@ -394,7 +392,7 @@ jobs:
           while IFS= read -r line; do
             name_conclusion_array+=("$line")
           done < <(echo "$json_data" | jq -r '.jobs[] | select(.name | startswith("test-pax-ff") and contains("outcome")) | "\(.name)\t\(.conclusion)"')
-        
+
           TABLE_MD=$(
           cat <<EOF
           | Rewind to | Test result | Image |
@@ -435,7 +433,7 @@ jobs:
 
           exit $ret_code
 
-      - if: inputs.FILE_ISSUE 
+      - if: inputs.FILE_ISSUE
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/{owner_and_repo}/issues
@@ -446,11 +444,11 @@ jobs:
           body: |
             | 
             * Github Action run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-  
+
             ${{ steps.summary-table.outputs.TABLE_MD }}
-            
+
             ${{ env.STAKEHOLDERS }}
           assignee: ${{ steps.summary-table.outputs.ASSIGNEE }}
-          labels: "[\"auto-triage\"]"
+          labels: '["auto-triage"]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
