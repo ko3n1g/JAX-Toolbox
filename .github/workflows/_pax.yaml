@@ -1,6 +1,25 @@
 name: Build, test, and publish PAX
 run-name: CI-${{ inputs.ARCHITECTURE }}
 on:
+  workflow_dispatch:
+    inputs:
+      ARCHITECTURE:
+        type: string
+        required: true
+        description: ''
+      BUILD_DATE:
+        type: string
+        description: Build date in YYYY-MM-DD format
+        required: false
+        default: NOT SPECIFIED
+      MANIFEST_ARTIFACT_NAME:
+        type: string
+        description: Artifact name in current run w/ manifest/patches. Leaving empty uses manifest/patches in current branch
+        default: ''
+        required: false
+      BASE_IMAGE:
+        type: string
+        description: ''
   workflow_call:
     inputs:
       ARCHITECTURE:
