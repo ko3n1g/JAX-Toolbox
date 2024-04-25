@@ -1,4 +1,4 @@
-name: Build, push, and deploy JAX
+name: Build, test, and publish JAX
 
 on:
   workflow_dispatch:
