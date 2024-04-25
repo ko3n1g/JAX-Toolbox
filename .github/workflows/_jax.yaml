@@ -142,12 +142,13 @@ jobs:
   # _core.yaml
   build-jax-amd64:
     uses: ./.github/workflows/_build.yaml
+    needs: base-amd64
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
       ARTIFACT_NAME: artifact-jax-build
       BADGE_FILENAME: badge-jax-build
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
-      BASE_IMAGE: ${{ inputs.BASE_IMAGE }}
+      BASE_IMAGE: ${{ needs.base-amd64.outputs.DOCKER_TAG }}
       CONTAINER_NAME: jax
       DOCKERFILE: .github/container/Dockerfile.jax
       RUNNER_SIZE: large
