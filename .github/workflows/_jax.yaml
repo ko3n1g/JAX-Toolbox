@@ -213,7 +213,7 @@ jobs:
 
   # AMD64: PAX
   pax-amd64:
-    needs: build-jax-amd64 # should be: [test-jax-amd64,test-pallas-amd64]
+    # needs: build-jax-amd64 # should be: [test-jax-amd64,test-pallas-amd64]
     runs-on: self-hosted
     steps:
       - name: Invoke PAX and wait for completion
