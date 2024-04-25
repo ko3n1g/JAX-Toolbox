@@ -140,7 +140,7 @@ jobs:
     secrets: inherit
 
   # _core.yaml
-  build-jax:
+  build-jax-amd64:
     uses: ./.github/workflows/_build.yaml
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
@@ -153,8 +153,8 @@ jobs:
       RUNNER_SIZE: large
     secrets: inherit
 
-  test-jax:
-    needs: build-jax
+  test-jax-amd64:
+    needs: build-jax-amd64
     if: inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
     uses: ./.github/workflows/_test_unit.yaml
     with:
@@ -184,8 +184,8 @@ jobs:
         test-gpu.log
     secrets: inherit
 
-  test-pallas:
-    needs: build-jax
+  test-pallas-amd64:
+    needs: build-jax-amd64
     if: inputs.ARCHITECTURE == 'amd64' # triton doesn't support arm64(?)
     uses: ./.github/workflows/_test_unit.yaml
     with:
@@ -211,7 +211,7 @@ jobs:
     secrets: inherit
 
   pax-amd64:
-    needs: jax-amd64
+    needs: build-jax-amd64 # should be: [test-jax-amd64,test-pallas-amd64]
     runs-on: self-hosted
     steps:
       - name: Start PAX AMD64 workflow
