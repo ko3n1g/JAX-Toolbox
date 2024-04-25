@@ -1,7 +1,6 @@
 name: Build, push, and deploy JAX
 
 on:
-  push:
   workflow_dispatch:
     inputs:
       PUBLISH:
