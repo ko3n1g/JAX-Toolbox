@@ -36,7 +36,7 @@ jobs:
           workflow: Build, test, and publish JAX
           token: ${{ secrets.TOKEN }}
           wait-for-completion: true
-          inputs: '{"ARCHITECTURE":"${{ inputs.ARCHITECTURE }}","BUILD_DATE":"${{ inputs.BUILD_DATE }}","MANIFEST_ARTIFACT_NAME":"${{ inputs.MANIFEST_ARTIFACT_NAME }}"}'
+          inputs: '{"ARCHITECTURE":"${{ inputs.ARCHITECTURE }}","BUILD_DATE":"${{ inputs.BUILD_DATE }}","MANIFEST_ARTIFACT_NAME":"${{ inputs.MANIFEST_ARTIFACT_NAME }}","DOCKER_TAG_FINAL":"${{ github.run_id }}-jax-${{ inputs.ARCHITECTURE }}","DOCKER_TAG_MEALKIT":"${{ github.run_id }}-jax-${{ inputs.ARCHITECTURE }}-mealkit"}'
 
   pax:
     needs: jax
@@ -48,4 +48,4 @@ jobs:
           workflow: Build, test, and publish PAX
           token: ${{ secrets.TOKEN }}
           wait-for-completion: true
-          inputs: '{"ARCHITECTURE":"${{ inputs.ARCHITECTURE }}","BUILD_DATE":"${{ inputs.BUILD_DATE }}","MANIFEST_ARTIFACT_NAME":"${{ inputs.MANIFEST_ARTIFACT_NAME }}"}'
+          inputs: '{"ARCHITECTURE":"${{ inputs.ARCHITECTURE }}","BUILD_DATE":"${{ inputs.BUILD_DATE }}","MANIFEST_ARTIFACT_NAME":"${{ inputs.MANIFEST_ARTIFACT_NAME }}","BASE_UMAE":"${{ github.run_id }}-jax-${{ inputs.ARCHITECTURE }}-mealkit}'

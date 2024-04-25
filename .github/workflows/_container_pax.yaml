@@ -37,10 +37,18 @@ on:
         required: false
       BASE_IMAGE:
         type: string
-    outputs:
-      DOCKER_TAGS:
-        description: JSON object containing tags of all docker images built
-        value: ${{ jobs.collect-docker-tags.outputs.TAGS }}
+      DOCKER_TAG_UPSTREAM_FINAL:
+        type: string
+        description: ''
+      DOCKER_TAG_UPSTREAM_MEALKIT:
+        type: string
+        description: ''
+      DOCKER_TAG_ROSETTA_FINAL:
+        type: string
+        description: ''
+      DOCKER_TAG_ROSETTA_MEALKIT:
+        type: string
+        description: ''
 
 permissions:
   contents: read # to fetch code
@@ -59,6 +67,8 @@ jobs:
       BASE_IMAGE: ${{ inputs.BASE_IMAGE }}
       CONTAINER_NAME: upstream-pax
       DOCKERFILE: .github/container/Dockerfile.pax.${{ inputs.ARCHITECTURE }}
+      DOCKER_TAG_FINAL: ${{ inputs.DOCKER_TAG_UPSTREAM_FINAL }}
+      DOCKER_TAG_MEALKIT: ${{ inputs.DOCKER_TAG_UPSTREAM_MEALKIT }}
     secrets: inherit
 
   test-te-multigpu:
@@ -113,6 +123,8 @@ jobs:
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
       BASE_IMAGE: ${{ needs.build-upstream-pax.outputs.DOCKER_TAG_MEALKIT }}
       BASE_LIBRARY: pax
+      DOCKER_TAG_FINAL: ${{ inputs.DOCKER_TAG_ROSETTA_FINAL }}
+      DOCKER_TAG_MEALKIT: ${{ inputs.DOCKER_TAG_ROSETTA_MEALKIT }}
     secrets: inherit
 
   test-rosetta-pax:

@@ -38,13 +38,12 @@ on:
         description: 'Size of the runner to use'
         required: false
         default: small
-    outputs:
       DOCKER_TAG_MEALKIT:
+        type: string
         description: "Tags of the 'mealkit' image built"
-        value: ${{ jobs.build.outputs.DOCKER_TAG_MEALKIT }}
       DOCKER_TAG_FINAL:
+        type: string
         description: 'Tags of the complete image built'
-        value: ${{ jobs.build.outputs.DOCKER_TAG_FINAL }}
 
 env:
   UPLD_IMAGE: ghcr.io/nvidia/jax-toolbox-internal
@@ -60,9 +59,6 @@ jobs:
     runs-on: self-hosted
     env:
       BADGE_FILENAME_FULL: ${{ inputs.BADGE_FILENAME }}-${{ inputs.ARCHITECTURE }}.json
-    outputs:
-      DOCKER_TAG_MEALKIT: ${{ steps.mealkit-build.outcome == 'success' && steps.mealkit-metadata.outputs.tags || '' }}
-      DOCKER_TAG_FINAL: ${{ steps.final-build.outcome == 'success' && steps.final-metadata.outputs.tags || '' }}
     steps:
       - name: Print environment variables
         run: env
@@ -107,7 +103,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=raw,value=${{ github.run_id }}-${{ inputs.CONTAINER_NAME }}-${{ inputs.ARCHITECTURE }}-mealkit
+            type=raw,value=${{ inputs.DOCKER_TAG_MEALKIT }}
           labels: org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
 
       - name: Build mealkit image
@@ -138,7 +134,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=raw,value=${{ github.run_id }}-${{ inputs.CONTAINER_NAME }}-${{ inputs.ARCHITECTURE }}
+            type=raw,value=${{ inputs.DOCKER_TAG_FINAL }}
           labels: org.opencontainers.image.created=${{ inputs.BUILD_DATE }}
 
       - name: Build final image

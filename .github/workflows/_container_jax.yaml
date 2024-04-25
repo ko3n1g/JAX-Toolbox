@@ -3,21 +3,31 @@ name: Build, test, and publish JAX
 on:
   workflow_dispatch:
     inputs:
+      ARCHITECTURE:
+        type: string
+        required: true
+        description: ''
+      BUILD_DATE:
+        type: string
+        description: Build date in YYYY-MM-DD format
+        required: false
+        default: NOT SPECIFIED
+      MANIFEST_ARTIFACT_NAME:
+        type: string
+        description: Artifact name in current run w/ manifest/patches. Leaving empty uses manifest/patches in current branch
+        default: ''
+        required: false
       PUBLISH:
         type: boolean
         description: Publish dated images and update the 'latest' tag?
         default: false
         required: false
-      BUMP_MANIFEST:
-        type: boolean
-        description: Bump git repos in manifest.yaml to head of tree?
-        default: false
-        required: false
-      MERGE_BUMPED_MANIFEST:
-        type: boolean
-        description: '(used if BUMP_MANIFEST=true) If true: attempt to PR/merge manifest branch'
-        default: false
-        required: false
+      DOCKER_TAG_FINAL:
+        type: string
+        description: ''
+      DOCKER_TAG_MEALKIT:
+        type: string
+        description: ''
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -53,6 +63,8 @@ jobs:
       CONTAINER_NAME: jax
       DOCKERFILE: .github/container/Dockerfile.jax
       RUNNER_SIZE: large
+      DOCKER_TAG_FINAL: ${{ inputs.DOCKER_TAG_FINAL }}
+      DOCKER_TAG_MEALKIT: ${{ inputs.DOCKER_TAG_MEALKIT }}
     secrets: inherit
 
   test-jax:
@@ -62,12 +74,12 @@ jobs:
       TEST_NAME: jax
       EXECUTE: |
         docker run -i --shm-size=1g --gpus all \
-        ${{ needs.build-jax.outputs.DOCKER_TAG_FINAL }} \
+        ${{ inputs.DOCKER_TAG_FINAL }} \
         bash <<"EOF" |& tee test-backend-independent.log
           test-jax.sh -b backend-independent 
         EOF
         docker run -i --shm-size=1g --gpus all \
-        ${{ needs.build-jax.outputs.DOCKER_TAG_FINAL }} \
+        ${{ inputs.DOCKER_TAG_FINAL }} \
         bash <<"EOF" |& tee tee test-gpu.log
           test-jax.sh -b gpu
         EOF
@@ -92,7 +104,7 @@ jobs:
       TEST_NAME: pallas
       EXECUTE: |
         docker run -i --shm-size=1g --gpus all --volume $PWD:/output \
-        ${{ needs.build-jax.outputs.DOCKER_TAG_FINAL }} \
+        ${{ inputs.DOCKER_TAG_FINAL }} \
         bash <<"EOF" |& tee test-pallas.log
           python /opt/jax/tests/pallas/pallas_test.py --xml_output_file /output/pallas_test.xml
         EOF
