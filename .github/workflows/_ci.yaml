@@ -1,5 +1,5 @@
 name: ~CI, single-arch
-run-name: CI-${{ inputs.ARCHITECTURE }}
+run-name: CI-${{ inputs.ARCHITECTURE }}-${{ inputs.TESTSUBSET }}
 on:
   workflow_call:
     inputs:
@@ -21,26 +21,60 @@ on:
         description: 'A JSON object containing git url+refs for softwares to be built'
         required: false
         default: '{}'
+      TEST_SUBSET:
+        type: string
+        description: |
+          Subset of tests to run. Allowed values are one of:
+            - base
+            - jax
+            - levanter
+            - equinox
+            - triton
+            - upstream-t5x
+            - rosetta-t5x
+            - upstream-pax
+            - rosetta-pax
+            - maxtext
+            - grok
+            
+            Will run all downstream-connected nodes and leaves.
+        default: 'base'
+        required: false
     outputs:
       DOCKER_TAGS:
         description: 'JSON object containing tags of all docker images built'
         value: ${{ jobs.collect-docker-tags.outputs.TAGS }}
 
 permissions:
-  contents: read  # to fetch code
-  actions:  write # to cancel previous workflows
+  contents: read # to fetch code
+  actions: write # to cancel previous workflows
   packages: write # to upload container
 
 jobs:
+  pre-flight:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Validate input `TEST_SUBSET`
+        shell: bash
+        run: |
+          valid_inputs=("base" "core" "levanter" "equinox" "triton" "upstream-t5x" "rosetta-t5x" "upstream-pax" "rosetta-pax" "maxtext" "grok")
 
+          if [[ " ${valid_inputs[*]} " != *" ${{ inputs.TEST_SUBSET }} "* ]]; then
+            echo "Invalid value for \`TEST_SUBSET\` provided. Expected one of: ($valid_inputs), Actual: ${{ inputs.TEST_SUBSET }}"
+            exit 1
+          fi
+
+  # Build base regardless of $TEST_SUBSET
   build-base:
     uses: ./.github/workflows/_build_base.yaml
+    needs: pre-flight
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
       MANIFEST_ARTIFACT_NAME: ${{ inputs.MANIFEST_ARTIFACT_NAME }}
     secrets: inherit
 
+  # Build jax regardless of $TEST_SUBSET
   build-jax:
     needs: build-base
     uses: ./.github/workflows/_build.yaml
@@ -60,9 +94,10 @@ jobs:
         URLREF_TRANSFORMER_ENGINE=${{ fromJson(inputs.SOURCE_URLREFS).TRANSFORMER_ENGINE }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "triton")
   build-triton:
     needs: build-jax
-    if: inputs.ARCHITECTURE == 'amd64' # Triton does not seem to support arm64
+    if: contains(fromJSON('["base", "jax", "triton"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # Triton does not seem to support arm64
     uses: ./.github/workflows/_build.yaml
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
@@ -76,9 +111,11 @@ jobs:
       EXTRA_BUILD_ARGS: URLREF_JAX_TRITON=${{ fromJson(inputs.SOURCE_URLREFS).JAX_TRITON }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "equinox")
   build-equinox:
     needs: build-jax
     uses: ./.github/workflows/_build.yaml
+    if: contains(fromJSON('["base", "jax", "equinox"]'), inputs.TEST_SUBSET)
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
       ARTIFACT_NAME: artifact-equinox-build
@@ -91,9 +128,10 @@ jobs:
         URLREF_EQUINOX=${{ fromJson(inputs.SOURCE_URLREFS).EQUINOX }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "maxtext")
   build-maxtext:
     needs: build-jax
-    if: inputs.ARCHITECTURE == 'amd64'
+    if: contains(fromJSON('["base", "jax", "maxtext"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # Triton does not seem to support arm64
     uses: ./.github/workflows/_build.yaml
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
@@ -107,13 +145,15 @@ jobs:
         URLREF_MAXTEXT=${{ fromJson(inputs.SOURCE_URLREFS).MAXTEXT }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "levanter")
   build-levanter:
     needs: [build-jax]
     uses: ./.github/workflows/_build.yaml
+    if: contains(fromJSON('["base", "jax", "levanter"]'), inputs.TEST_SUBSET)
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
-      ARTIFACT_NAME: "artifact-levanter-build"
-      BADGE_FILENAME: "badge-levanter-build"
+      ARTIFACT_NAME: 'artifact-levanter-build'
+      BADGE_FILENAME: 'badge-levanter-build'
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
       BASE_IMAGE: ${{ needs.build-jax.outputs.DOCKER_TAG_MEALKIT }}
       CONTAINER_NAME: levanter
@@ -123,13 +163,15 @@ jobs:
         URLREF_HALIAX=${{ fromJson(inputs.SOURCE_URLREFS).HALIAX }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-t5x", "rosetta-t5x")
   build-upstream-t5x:
     needs: build-jax
     uses: ./.github/workflows/_build.yaml
+    if: contains(fromJSON('["base", "jax", "upstream-t5x", "rosetta-t5x"]'), inputs.TEST_SUBSET)
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
-      ARTIFACT_NAME: "artifact-t5x-build"
-      BADGE_FILENAME: "badge-t5x-build"
+      ARTIFACT_NAME: 'artifact-t5x-build'
+      BADGE_FILENAME: 'badge-t5x-build'
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
       BASE_IMAGE: ${{ needs.build-jax.outputs.DOCKER_TAG_MEALKIT }}
       CONTAINER_NAME: upstream-t5x
@@ -138,9 +180,11 @@ jobs:
         URLREF_T5X=${{ fromJson(inputs.SOURCE_URLREFS).T5X }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-pax", "rosetta-pax")
   build-upstream-pax:
     needs: build-jax
     uses: ./.github/workflows/_build.yaml
+    if: contains(fromJSON('["base", "jax", "upstream-pax", "rosetta-pax"]'), inputs.TEST_SUBSET)
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
       ARTIFACT_NAME: artifact-pax-build
@@ -154,9 +198,11 @@ jobs:
         URLREF_PRAXIS=${{ fromJson(inputs.SOURCE_URLREFS).PRAXIS }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-t5x", "rosetta-t5x")
   build-rosetta-t5x:
     needs: build-upstream-t5x
     uses: ./.github/workflows/_build_rosetta.yaml
+    if: contains(fromJSON('["base", "jax", "upstream-t5x", "rosetta-t5x"]'), inputs.TEST_SUBSET)
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
@@ -164,9 +210,11 @@ jobs:
       BASE_LIBRARY: t5x
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-pax", "rosetta-pax")
   build-rosetta-pax:
     needs: build-upstream-pax
     uses: ./.github/workflows/_build_rosetta.yaml
+    if: contains(fromJSON('["base", "jax", "upstream-pax", "rosetta-pax"]'), inputs.TEST_SUBSET)
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
@@ -174,13 +222,15 @@ jobs:
       BASE_LIBRARY: pax
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "grok")
   build-grok:
     needs: [build-jax]
     uses: ./.github/workflows/_build.yaml
+    if: contains(fromJSON('["base", "jax", "grok"]'), inputs.TEST_SUBSET)
     with:
       ARCHITECTURE: ${{ inputs.ARCHITECTURE }}
-      ARTIFACT_NAME: "artifact-grok-build"
-      BADGE_FILENAME: "badge-grok-build"
+      ARTIFACT_NAME: 'artifact-grok-build'
+      BADGE_FILENAME: 'badge-grok-build'
       BUILD_DATE: ${{ inputs.BUILD_DATE }}
       BASE_IMAGE: ${{ needs.build-jax.outputs.DOCKER_TAG_MEALKIT }}
       CONTAINER_NAME: grok
@@ -191,7 +241,7 @@ jobs:
 
   collect-docker-tags:
     runs-on: ubuntu-22.04
-    if: "!cancelled()"
+    if: '!cancelled()'
     needs:
       - build-base
       - build-jax
@@ -262,9 +312,10 @@ jobs:
       - name: Run integration test ${{ matrix.TEST_SCRIPT }}
         run: bash rosetta/tests/${{ matrix.TEST_SCRIPT }}
 
+  # If $TEST_SUBSET IN ("base", "jax")
   test-jax:
     needs: build-jax
-    if: inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
+    if: contains(fromJSON('["base", "jax"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
     uses: ./.github/workflows/_test_unit.yaml
     with:
       TEST_NAME: jax
@@ -317,33 +368,37 @@ jobs:
   #       test-equinox.log
   #   secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-pax")
   test-te-multigpu:
     needs: build-upstream-pax
-    if: inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
+    if: contains(fromJSON('["base", "jax", "upstream-pax"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
     uses: ./.github/workflows/_test_te.yaml
     with:
       TE_IMAGE: ${{ needs.build-upstream-pax.outputs.DOCKER_TAG_FINAL }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-t5x")
   test-upstream-t5x:
     needs: build-upstream-t5x
-    if: inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
+    if: contains(fromJSON('["base", "jax", "upstream-t5x"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
     uses: ./.github/workflows/_test_upstream_t5x.yaml
     with:
       T5X_IMAGE: ${{ needs.build-upstream-t5x.outputs.DOCKER_TAG_FINAL }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-t5x", "rosetta-t5x")
   test-rosetta-t5x:
     needs: build-rosetta-t5x
-    if: inputs.ARCHITECTURE == 'amd64' # no images for arm64
+    if: contains(fromJSON('["base", "jax", "upstream-t5x", "rosetta-t5x"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # no images for arm64
     uses: ./.github/workflows/_test_t5x_rosetta.yaml
     with:
       T5X_IMAGE: ${{ needs.build-rosetta-t5x.outputs.DOCKER_TAG_FINAL }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax")
   test-pallas:
     needs: build-jax
-    if: inputs.ARCHITECTURE == 'amd64'
+    if: contains(fromJSON('["base", "jax"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # triton doesn't support arm64(?)
     uses: ./.github/workflows/_test_unit.yaml
     with:
       TEST_NAME: pallas
@@ -367,9 +422,10 @@ jobs:
         test-pallas.log
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "triton")
   test-triton:
     needs: build-triton
-    if: inputs.ARCHITECTURE == 'amd64' # no images for arm64
+    if: contains(fromJSON('["base", "jax", "triton"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # no images for arm64
     uses: ./.github/workflows/_test_unit.yaml
     with:
       TEST_NAME: triton
@@ -395,9 +451,10 @@ jobs:
         test-triton.log
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "levanter")
   test-levanter:
     needs: build-levanter
-    if: inputs.ARCHITECTURE == 'amd64'  # arm64 runners n/a
+    if: contains(fromJSON('["base", "jax", "levanter"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
     uses: ./.github/workflows/_test_unit.yaml
     with:
       TEST_NAME: levanter
@@ -422,9 +479,10 @@ jobs:
         test-levanter.log
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-pax")
   test-te:
     needs: build-upstream-pax
-    if: inputs.ARCHITECTURE == 'amd64'  # arm64 runners n/a
+    if: contains(fromJSON('["base", "jax", "upstream-pax"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # arm64 runners n/a
     uses: ./.github/workflows/_test_unit.yaml
     with:
       TEST_NAME: te
@@ -450,25 +508,28 @@ jobs:
         pytest-report.jsonl
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-pax")
   test-upstream-pax:
     needs: build-upstream-pax
-    if: inputs.ARCHITECTURE == 'amd64' # no images for arm64
+    if: contains(fromJSON('["base", "jax", "upstream-pax"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # no images for arm64
     uses: ./.github/workflows/_test_upstream_pax.yaml
     with:
       PAX_IMAGE: ${{ needs.build-upstream-pax.outputs.DOCKER_TAG_FINAL }}
     secrets: inherit
 
+  # If $TEST_SUBSET IN ("base", "jax", "upstream-pax", "rosetta-pax")
   test-rosetta-pax:
     needs: build-rosetta-pax
-    if: inputs.ARCHITECTURE == 'amd64' # no images for arm64
+    if: contains(fromJSON('["base", "jax", "upstream-pax", "rosetta-pax"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # no images for arm64
     uses: ./.github/workflows/_test_pax_rosetta.yaml
     with:
       PAX_IMAGE: ${{ needs.build-rosetta-pax.outputs.DOCKER_TAG_FINAL }}
     secrets: inherit
 
+  # base, jax, maxtext
   test-maxtext:
     needs: build-maxtext
-    if: inputs.ARCHITECTURE == 'amd64' # no images for arm64
+    if: contains(fromJSON('["base", "jax", "maxtext"]'), inputs.TEST_SUBSET) && inputs.ARCHITECTURE == 'amd64' # no images for arm64
     uses: ./.github/workflows/_test_maxtext.yaml
     with:
       MAXTEXT_IMAGE: ${{ needs.build-maxtext.outputs.DOCKER_TAG_FINAL }}
