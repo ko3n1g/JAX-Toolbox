@@ -11,6 +11,8 @@ on:
       - synchronize
     paths-ignore:
       - '**.md'
+  issue_comment:
+    types: [created]
   workflow_dispatch:
     inputs:
       PUBLISH:
@@ -101,6 +103,12 @@ jobs:
             echo "Error: If BUMP_MANIFEST=false, MERGE_BUMPED_MANIFEST cannot be true" >&2
             exit 1
           fi
+        
+      - name: Set TESTSET
+        id: testset
+        shell: bash -x -e {0}
+        run: |
+          echo ${{ github.event.comment.body }}
 
   bump-manifest:
     needs: metadata
