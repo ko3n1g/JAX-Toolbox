@@ -54,7 +54,9 @@ jobs:
     steps:
       - name: Triggered by comment
         shell: bash
-        run: exit 0
+        run: |
+          echo ${{ github.head_ref || github.ref }}
+          exit 0
 
   metadata:
     runs-on: ubuntu-22.04
