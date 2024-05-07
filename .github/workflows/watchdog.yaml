@@ -26,7 +26,7 @@ jobs:
 
       - name: Get Pull Request Information
         uses: actions/github-script@v6
-        id: pr-information
+        id: get-pr-branch
         with:
           script: |
             const pr = await github.rest.pulls.get({
@@ -37,15 +37,10 @@ jobs:
             console.log('Pull Request Information:', pr.data);
             return pr.data.head.ref;
 
-      - name: Read result
-        shell: bash
-        run: echo ${{ steps.pr-information.outputs.result }}
-
-      # - name: Workflow Dispatch and wait              
-      #   uses: aurelien-baudet/workflow-dispatch@v2.1.1
-      #   with:
-      #     workflow: "CI"
-      #     token: ...
-      #     wait-for-completion: false
-      #     inputs: '{ "message":  }'
-      #     ref: 
+      - name: Workflow Dispatch and wait              
+        uses: aurelien-baudet/workflow-dispatch@v2.1.1
+        with:
+          workflow: "CI"
+          token: ${{ secrets.TOKEN }}
+          wait-for-completion: false
+          ref: ${{ steps.get-pr-branch.outputs.result }}
