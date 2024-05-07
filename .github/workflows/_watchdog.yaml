@@ -5,7 +5,7 @@ on:
     types: [created]
 
 jobs:
-  main:
+  bark:
     runs-on: ubuntu-22.04
     if: >
       github.event_name == 'issue_comment' &&
