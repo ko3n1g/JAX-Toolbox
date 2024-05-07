@@ -35,7 +35,7 @@ jobs:
               pull_number: ${{ steps.get-pr-num.outputs.pr_number }}
             });
             console.log('Pull Request Information:', pr.data);
-            return pr.data;
+            return pr.data.head.ref;
 
       - name: Read result
         shell: bash
