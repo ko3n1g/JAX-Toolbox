@@ -37,6 +37,11 @@ jobs:
             console.log('Pull Request Information:', pr.data);
             return pr.data.head.ref;
 
+      - name: Check out the repository under ${GITHUB_WORKSPACE}
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+
       - name: Workflow Dispatch and wait              
         uses: aurelien-baudet/workflow-dispatch@v2.1.1
         with:
