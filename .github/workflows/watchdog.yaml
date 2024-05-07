@@ -35,7 +35,7 @@ jobs:
               pull_number: ${{ steps.get-pr-num.outputs.pr_number }}
             });
             console.log('Pull Request Information:', pr.data);
-            return pr.data.head.ref.replace(/"/g, "");
+            return pr.data.head.ref;
 
       - name: Workflow Dispatch and wait              
         uses: aurelien-baudet/workflow-dispatch@v2.1.1
@@ -43,4 +43,4 @@ jobs:
           workflow: "CI"
           token: ${{ secrets.TOKEN }}
           wait-for-completion: false
-          ref: ${{ steps.get-pr-branch.outputs.result }}
+          ref: origin/test
