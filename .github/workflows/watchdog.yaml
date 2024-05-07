@@ -14,10 +14,38 @@ jobs:
     steps:
       - name: Triggered by comment
         shell: bash
+        id: get-pr-num
         run: |
           PR_URL="${{ github.event.issue.pull_request.url }}"
           PR_NUM=${PR_URL##*/}
           
           echo ${{ github.head_ref || github.ref }}
           echo $PR_NUM
+          echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
           exit 0
+
+      - name: Get Pull Request Information
+        uses: actions/github-script@v6
+        id: pr-information
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: github.repository_owner,
+              repo: github.repository,
+              pull_number: ${{ steps.get-pr-num.outputs.pr_number }}
+            });
+            console.log('Pull Request Information:', pr.data);
+            return pr.data;
+
+      - name: Read result
+        shell: bash
+        run: echo ${{ steps.pr-information.outputs.result }}
+
+      # - name: Workflow Dispatch and wait              
+      #   uses: aurelien-baudet/workflow-dispatch@v2.1.1
+      #   with:
+      #     workflow: "CI"
+      #     token: ...
+      #     wait-for-completion: false
+      #     inputs: '{ "message":  }'
+      #     ref: 
