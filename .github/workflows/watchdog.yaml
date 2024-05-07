@@ -28,6 +28,7 @@ jobs:
         uses: actions/github-script@v6
         id: get-pr-branch
         with:
+          result-encoding: string
           script: |
             const pr = await github.rest.pulls.get({
               owner: context.repo.owner,
@@ -43,4 +44,4 @@ jobs:
           workflow: "CI"
           token: ${{ secrets.TOKEN }}
           wait-for-completion: false
-          ref: origin/test
+          ref: ${{ steps.get-pr-branch.outputs.result }}
