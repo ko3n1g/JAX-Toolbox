@@ -30,8 +30,8 @@ jobs:
         with:
           script: |
             const pr = await github.rest.pulls.get({
-              owner: github.repository_owner,
-              repo: github.repository,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               pull_number: ${{ steps.get-pr-num.outputs.pr_number }}
             });
             console.log('Pull Request Information:', pr.data);
