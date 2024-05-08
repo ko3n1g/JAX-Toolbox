@@ -61,6 +61,9 @@ jobs:
       MANIFEST_BRANCH: ${{ steps.manifest-branch.outputs.MANIFEST_BRANCH }}
       MERGE_BUMPED_MANIFEST: ${{ steps.manifest-branch.outputs.MERGE_BUMBED_MANIFEST }}
     steps:
+      - name: Actor
+        shell: bash
+        run: echo ${{ github.actor }}
       - name: Cancel workflow run if the trigger is a draft PR
         id: cancel-if-draft
         if: github.event_name == 'pull_request' && github.event.pull_request.draft == true
