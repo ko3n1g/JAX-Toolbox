@@ -43,4 +43,4 @@ jobs:
           workflow: "CI"
           token: ${{ secrets.GITHUB_TOKEN }}
           wait-for-completion: false
-          ref: ${{ steps.get-pr-branch.outputs.result }}
+          ref: main # ${{ steps.get-pr-branch.outputs.result }}
