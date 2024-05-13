@@ -14,8 +14,8 @@ jobs:
     steps:
       - name: Get var
         shell: bash
-        run: echo ${{ vars.hello }}
-            
+        run: echo ${{ vars.HELLO }}
+
       - name: Triggered by comment
         shell: bash
         id: get-pr-num
