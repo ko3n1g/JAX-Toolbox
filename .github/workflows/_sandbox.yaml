@@ -7,6 +7,10 @@ jobs:
   sandbox:
     runs-on: ubuntu-22.04
     steps:
+      - name: Get var
+        shell: bash
+        
+        run: echo muhaha ${{ vars.HELLO }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
