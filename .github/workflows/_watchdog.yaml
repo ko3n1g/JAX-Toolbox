@@ -19,7 +19,7 @@ jobs:
           PR_URL="${{ github.event.issue.pull_request.url }}"
           PR_NUM=${PR_URL##*/}
           echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
-          echo "${{ github.event.commment.user.login }}"
+          echo "${{ github.actor }}"
 
       - name: Get Pull Request Information
         uses: actions/github-script@v6
