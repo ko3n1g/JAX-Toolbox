@@ -3,7 +3,8 @@ name: watchdog
 on:
   issue_comment:
     types: [created]
-
+  workflow_dispatch:
+    
 jobs:
   bark:
     runs-on: ubuntu-22.04
@@ -16,7 +17,7 @@ jobs:
       - name: Get var
         shell: bash
         
-        run: echo ${{ vars.HELLO }}
+        run: echo muhaha ${{ vars.HELLO }}
 
       - name: Triggered by comment
         shell: bash
