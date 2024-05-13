@@ -4,9 +4,6 @@ on:
   issue_comment:
     types: [created]
 
-permissions:
-  actions:  write 
-
 jobs:
   bark:
     runs-on: ubuntu-22.04
@@ -15,6 +12,10 @@ jobs:
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/cicd')
     steps:
+      - name: Get var
+        shell: bash
+        run: echo ${{ vars.hello }}
+            
       - name: Triggered by comment
         shell: bash
         id: get-pr-num
