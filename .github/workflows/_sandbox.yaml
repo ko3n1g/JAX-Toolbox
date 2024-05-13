@@ -6,7 +6,6 @@ on:
 jobs:
   sandbox:
     runs-on: ubuntu-22.04
-    environment: main
     steps:
       - name: Get var
         shell: bash
