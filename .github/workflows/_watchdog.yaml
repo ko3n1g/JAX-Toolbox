@@ -3,21 +3,20 @@ name: watchdog
 on:
   issue_comment:
     types: [created]
-  workflow_dispatch:
 
 jobs:
   bark:
     runs-on: ubuntu-22.04
-    # if: >
-    #   github.event_name == 'issue_comment' &&
-    #   github.event.issue.pull_request &&
-    #   contains(github.event.comment.body, '/cicd')
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/cicd')
     environment: main
     steps:
       - name: Get var
         shell: bash
         
-        run: echo ${{ vars.HELLO }} ${{ secrets.HELLO }}
+        run: echo ${{ vars.HELLO }}
 
       - name: Triggered by comment
         shell: bash
