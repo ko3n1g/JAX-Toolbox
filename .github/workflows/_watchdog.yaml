@@ -58,7 +58,7 @@ jobs:
 
           Watchdog 🤖: presubmit CI was automatically triggered. Click [here](${{ steps.trigger.outputs.workflow-url }}) to navigate to the workflow run.
           "
-          message="${message//$'\n'/<br />}"
+          message="${message//$'\n'/<br>}"
 
           curl -L \
             -X PATCH \
