@@ -52,12 +52,15 @@ jobs:
       - name: Update PR issue comment
         shell: bash
         run: |
-          message="${{ github.event.comment.body}}
+          message="\
+          ${{ github.event.comment.body}}
 
           ---
 
           Watchdog 🤖: presubmit CI was automatically triggered. Click [here](${{ steps.trigger.outputs.workflow-url }}) to navigate to the workflow run.
           "
+          message="${message//$'\n'/<br />}"
+
           curl -L \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
