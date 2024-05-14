@@ -52,8 +52,7 @@ jobs:
       - name: Update PR issue comment
         shell: bash
         run: |
-          message="\
-          ${{ github.event.comment.body}}
+          message="${{ github.event.comment.body}}
 
           ---
 
