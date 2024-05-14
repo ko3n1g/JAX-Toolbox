@@ -47,18 +47,21 @@ jobs:
 
       - name: Fetch latest run of `CI`
         shell: bash
+        run: echo "Click [here](${{ steps.trigger.outputs.workflow-url }}) to navigate to the workflow run." >> $GITHUB_STEP_SUMMARY
+
+      - name: Update PR issue comment
+        shell: bash
         run: |
-          echo ${{ steps.trigger.outputs.workflow-url }}
-          workflow_id=$(curl -L \
+          message="${{ github.event.comment.body}}
+
+          ---
+
+          Watchdog 🤖: presubmit CI was automatically triggered. Click [here](${{ steps.trigger.outputs.workflow-url }}) to navigate to the workflow run.
+          "
+          curl -L \
+            -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows | jq '.workflows[] | select(.name == "CI") | .id')
-
-          workflow_run_url=$(curl -L \
-            -H "Accept: Bapplication/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/runs?branch=${{ steps.get-pr-branch.outputs.result }}" | jq --argjson workflow_id $workflow_id '[.workflow_runs[] | select(.workflow_id == $workflow_id and .actor.login == "github-actions[bot]")][0].html_url' | tr -d '"')
-
-          echo "Click [here]($workflow_run_url) to navigate to the workflow run." >> $GITHUB_STEP_SUMMARY
+            https://api.github.com/repos/ko3n1g/JAX-Toolbox/issues/comments/2108867623 \
+            -d '{"body":"'$message'"}'
