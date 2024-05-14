@@ -48,7 +48,7 @@ jobs:
       - name: Fetch latest run of `CI`
         shell: bash
         run: |
-          echo ${{ steps.trigger.outputs.stdout }}   
+          echo ${{ steps.trigger.outputs.workflow-url }}
           workflow_id=$(curl -L \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
