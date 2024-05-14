@@ -38,6 +38,7 @@ jobs:
 
       - name: Trigger `CI` workflow on subset of tests          
         uses: aurelien-baudet/workflow-dispatch@v2.1.1
+        id: trigger
         with:
           workflow: "CI"
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -47,6 +48,7 @@ jobs:
       - name: Fetch latest run of `CI`
         shell: bash
         run: |
+          echo ${{ steps.trigger.outputs.stdout }}   
           workflow_id=$(curl -L \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
