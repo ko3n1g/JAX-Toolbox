@@ -23,7 +23,7 @@ jobs:
         shell: bash
         id: state
         run: |
-          test_subset=$(echo "${{ github.event.comment.body }} " | cut -d' ' -f2-)
+          test_subset=$(echo "${{ github.event.comment.body }} " | cut -d' ' -f2- | tr -d ' ')
           valid_test_subsets=$(yq '.on.workflow_dispatch.inputs.TEST_SUBSET.options | join(",")'  .github/workflows/ci.yaml)
 
           if [[ " $valid_test_subsets " != *" $test_subset "* ]]; then
