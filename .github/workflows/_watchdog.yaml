@@ -26,11 +26,11 @@ jobs:
           valid_test_subsets=$(yq '.on.workflow_dispatch.inputs.TEST_SUBSET.options | join(",")'  .github/workflows/ci.yaml)
 
           if [[ "$valid_test_subsets" != *"$test_subset"* ]]; then
-            message="Invalid value for '/ci \$TEST_SUBSET' provided. Expected one of: ($valid_test_subsets), Actual: $test_subset"
+            message="Invalid value for '/ci \$TEST_SUBSET' provided ❌. Expected one of: ($valid_test_subsets), Actual: $test_subset"
             echo "message=$message" >> "$GITHUB_OUTPUT"
             exit 1
           else
-            message="About to trigger presubmit CI on '$test_subset'. Stay tuned for the next update."
+            message="About to trigger presubmit CI on '$test_subset'. Stay tuned for the next update ⏳."
             echo "message=$message" >> "$GITHUB_OUTPUT"
           fi
 
@@ -102,9 +102,9 @@ jobs:
         if: always()
         run: |
           if [[ "${{ steps.trigger.outcome }}" == "success" ]]; then
-            dispatch_result_message="presubmit CI was successfully triggered. Click [here](${{ steps.trigger.outputs.workflow-url }}) to navigate to the workflow run."
+            dispatch_result_message="presubmit CI was successfully triggered ✅. Click [here](${{ steps.trigger.outputs.workflow-url }}) to navigate to the workflow run."
           else
-            dispatch_result_message="presubmit CI was not successfully triggered. Click [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more information."
+            dispatch_result_message="presubmit CI was not successfully triggered ❌. Click [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more information."
           fi
 
           dispatch_result_message="Watchdog 🤖: $dispatch_result_message"
