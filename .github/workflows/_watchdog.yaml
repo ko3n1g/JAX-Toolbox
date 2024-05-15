@@ -101,7 +101,7 @@ jobs:
         id: result
         if: always()
         run: |
-          if [[ "${{ steps.trigger.outputs.workflow-conclusion }}" == "success" ]]; then
+          if [[ "${{ steps.trigger.outcome }}" == "success" ]]; then
             dispatch_result_message="presubmit CI was automatically triggered. Click [here](${{ steps.trigger.outputs.workflow-url }}) to navigate to the workflow run."
           else
             dispatch_result_message="presubmit CI was not successfully triggered. Click [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more information."
