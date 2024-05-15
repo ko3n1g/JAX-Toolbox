@@ -99,15 +99,8 @@ jobs:
       - name: Update PR issue comment
         shell: bash
         run: |
-          # Current message that may contain a woof-response
-          message="${{ github.event.comment.body}}"
+          message="${{ github.event.comment.body}}<woof>
 
-          # Remove old woof-response
-          message=$(awk -F '<woof>' '{print $1}' <<< "$message")
-
-          # Add new woof-response
-          message="$message<woof>
-          <woof>
           ---
 
           ${{ steps.message.outputs.message }}
