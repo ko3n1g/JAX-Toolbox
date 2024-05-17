@@ -91,7 +91,7 @@ jobs:
 
             for test_subset in "${test_subsets[@]}"; do     
               echo $test_subset
-              echo list_of_items
+              echo $list_of_items
               if [[ $test_subset == "" || "$list_of_items" != *"$test_subset"* ]]; then
                 echo "false"
               else
