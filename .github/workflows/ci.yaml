@@ -35,10 +35,10 @@ on:
           PACKAGE∊{JAX,XLA,Flax,transformer-engine,T5X,paxml,praxis,maxtext,levanter,haliax,grok,mujuco,mujuco-mpc} (case-insensitive)
         default: ''
       TEST_SUBSET:
-        type: choice
+        type: string
         options:
           - base
-          - core
+          - jax
           - levanter
           - equinox
           - triton
