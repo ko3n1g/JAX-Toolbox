@@ -22,7 +22,7 @@ jobs:
         shell: bash
         id: state
         run: |
-          test_subsets=$(echo "${{ github.event.comment.body }} " | cut -d' ' -f2- | tr -d ' ')
+          test_subsets=$(echo "${{ github.event.comment.body }} " | cut -d' ' -f2- | awk '{$1=$1;print}')
           IFS=' ' read -a test_subsets <<< "$test_subsets"
 
           valid_test_subsets=$(yq '.on.workflow_dispatch.inputs.TEST_SUBSET.options | join(",")'  .github/workflows/ci.yaml)
