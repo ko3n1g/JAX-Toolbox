@@ -37,7 +37,7 @@ jobs:
 
           test_subsets=$(IFS=' '; echo "${test_subsets[*]}")
 
-          message="About to trigger presubmit CI on '$test_subset'. Stay tuned for the next update ⏳."
+          message="About to trigger presubmit CI on '$test_subsets'. Stay tuned for the next update ⏳."
           echo "message=$message" >> "$GITHUB_OUTPUT"
           echo "test_subset=$test_subsets" >> "$GITHUB_OUTPUT"
 
