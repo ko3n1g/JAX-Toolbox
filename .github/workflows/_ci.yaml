@@ -87,7 +87,7 @@ jobs:
         run: |
           if_testset_in() {
             local list_of_items="$1"  # The list of items as a string
-            IFS=' ' read -a test_subsets <<< "${{ steps.validate.output.test_subset }}"
+            IFS=' ' read -a test_subsets <<< "${{ steps.validate.outputs.test_subset }}"
 
             for test_subset in "${test_subsets[@]}"; do     
               echo $test_subset
