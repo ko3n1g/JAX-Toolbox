@@ -35,9 +35,11 @@ jobs:
             fi
           done
 
+          test_subsets=$(IFS=' '; echo "${test_subsets[*]}")
+
           message="About to trigger presubmit CI on '$test_subset'. Stay tuned for the next update ⏳."
           echo "message=$message" >> "$GITHUB_OUTPUT"
-          echo "test_subset=$test_subsets" >> "$GITHUB_OUTPUT"
+          echo "test_subset=" >> "$GITHUB_OUTPUT"
 
       - name: Update PR issue comment
         shell: bash
