@@ -134,7 +134,7 @@ jobs:
         id: testset
         shell: bash -x -e {0}
         run: |
-          TEST_SUBSET=${{ inputs.TEST_SUBSET || 'base' }}
+          TEST_SUBSET="${{ inputs.TEST_SUBSET || 'base' }}"
           echo "TEST_SUBSET=$TEST_SUBSET" | tee -a $GITHUB_OUTPUT
 
   bump-manifest:
