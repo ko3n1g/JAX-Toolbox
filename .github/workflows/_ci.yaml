@@ -24,20 +24,9 @@ on:
       TEST_SUBSET:
         type: string
         description: |
-          Subset of tests to run. Allowed values are one of:
-            - base
-            - jax
-            - levanter
-            - equinox
-            - triton
-            - upstream-t5x
-            - rosetta-t5x
-            - upstream-pax
-            - rosetta-pax
-            - maxtext
-            - grok
-            
-            Will run all downstream-connected nodes and leaves.
+          Subset of tests to run. 
+          Will run all downstream-connected nodes and leaves.
+          See `ci.yaml` for all options.
         default: 'base'
         required: false
     outputs:
@@ -75,13 +64,22 @@ jobs:
 
       - name: Validate input `TEST_SUBSET`
         shell: bash
+        id: validate
         run: |
-          valid_subsets=$(yq '.on.workflow_dispatch.inputs.TEST_SUBSET.options | join(",")'  .github/workflows/ci.yaml)
+          test_subsets=$(echo "${{ inputs.TEST_SUBSET }}" | awk '{$1=$1;print}')
+          IFS=' ' read -a test_subsets <<< "$test_subsets"
 
-          if [[ "$valid_subsets" != *"${{ inputs.TEST_SUBSET }}"* ]]; then
-            echo "Invalid value for \`TEST_SUBSET\` provided. Expected one of: ($valid_inputs), Actual: ${{ inputs.TEST_SUBSET }}"
-            exit 1
-          fi
+          valid_test_subsets=$(yq '.on.workflow_dispatch.inputs.TEST_SUBSET.options | join(",")'  .github/workflows/ci.yaml)
+          
+          for test_subset in "${test_subsets[@]}"; do     
+            if [[ $test_subset == "" || "$valid_test_subsets" != *"$test_subset"* ]]; then
+              message="Invalid value for '<TEST_SUBSET>' provided ❌. Expected one of: ($valid_test_subsets), Actual: '$test_subset'"
+              exit 1
+            fi
+          done
+
+          test_subsets=$(IFS=' '; echo "${test_subsets[*]}")
+          echo "test_subset=$test_subsets" >> "$GITHUB_OUTPUT"
 
       - name: Compile run-conditions
         id: run-conditions
@@ -89,14 +87,15 @@ jobs:
         run: |
           if_testset_in() {
             local list_of_items="$1"  # The list of items as a string
-            item="${{ inputs.TEST_SUBSET }}"
+            IFS=' ' read -a test_subsets <<< "${{ steps.validate.output.test_subset }}"
 
-            # Check if the item is in the list
-            if [[ " $list_of_items " == *" $item "* ]]; then
-                echo "true"  # Item found
-            else
-                echo "false"  # Item not found
-            fi
+            for test_subset in "${test_subsets[@]}"; do     
+              if [[ $test_subset == "" || "$list_of_items" != *"$test_subset"* ]]; then
+                echo "true"
+              else
+                echo "false"
+              fi
+            done
           }
           
           echo BUILD_TRITON=$(if_testset_in "base jax triton") >> $GITHUB_OUTPUT
